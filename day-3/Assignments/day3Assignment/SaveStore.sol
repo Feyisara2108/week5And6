@@ -1,99 +1,81 @@
-// Task 3 DAY 3
-// requirements
-// Write a smart contract that can save both ERC20 and ether for a user.
-
-// Users must be able to:
-// check individual balances,
-// deposit or save in the contract.
-// withdraw their savings
-
-// SPDX-License-Identifier:MIT
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
+// Minimal ERC20 interface
+interface IERC20 {
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+    function transfer(address recipient, uint256 amount) external returns (bool);
+}
+
 contract SaveStore {
-    uint256 public totalSupply;
+    // STORAGE
 
-    mapping(address _owner => uint256 balance) public balanceOf;
-    mapping(address _owner => mapping(address _spender => uint256 _amount)) public allowance;
+    // Tracks Ether saved by users
+    mapping(address => uint256) public etherBalance;
 
-    string public constant name = "Save";
-    string public constant symbol = "Sav";
-    uint8 public constant decimals = 18;
+    // Tracks ERC20 saved by users
+    // user => tokenAddress => amount
+    mapping(address => mapping(address => uint256)) public tokenBalance;
 
-    address public owner;
+    // =========================
+    // EVENTS
+    // =========================
 
-    event checkBalance(address indexed from, address indexed to, uint256 indexed _amount);
-    event Approval(address indexed owner, address indexed spender, uint256 indexed _amount);
+    event EtherDeposited(address indexed user, uint256 amount);
+    event EtherWithdrawn(address indexed user, uint256 amount);
 
-    // error NotOwner(address caller);
-    // error ZeroAddress();
-    // error InsufficientBalance(uint256 available, uint256 required);
-    // error InsufficientAllowance(uint256 available, uint256 required);
+    event TokenDeposited(address indexed user, address indexed token, uint256 amount);
+    event TokenWithdrawn(address indexed user, address indexed token, uint256 amount);
 
-    modifier onlyOwner() {
-        if (msg.sender != owner) revert NotOwner(msg.sender);
-        _;
+    // =========================
+    // ETHER FUNCTIONS
+    // =========================
+
+    function depositEther() external payable {
+        require(msg.value > 0, "Send Ether");
+
+        etherBalance[msg.sender] += msg.value;
+
+        emit EtherDeposited(msg.sender, msg.value);
     }
 
-    constructor(uint256 _initialSupply) {
-        owner = msg.sender;
-        _mint(msg.sender, _initialSupply);
+    function withdrawEther(uint256 amount) external {
+        require(etherBalance[msg.sender] >= amount, "Insufficient balance");
+
+        etherBalance[msg.sender] -= amount;
+
+        payable(msg.sender).transfer(amount);
+
+        emit EtherWithdrawn(msg.sender, amount);
     }
 
-    function checkBalance(address recipient, uint256 _amount) external returns (bool) {
-        if (recipient == address(0)) revert ZeroAddress();
-        if (balanceOf[msg.sender] < _amount) revert InsufficientBalance(balanceOf[msg.sender], _amount);
-
-        balanceOf[msg.sender] -= _amount;
-        balanceOf[recipient] += _amount;
-
-        emit checkBalance(msg.sender, recipient, _amount);
-        return true;
+    function checkEtherBalance() external view returns (uint256) {
+        return etherBalance[msg.sender];
     }
 
-    function approve(address spender, uint256 _amount) external returns (bool) {
-        if (spender == address(0)) revert ZeroAddress();
+    // ERC20 FUNCTIONS
+    function depositToken(address token, uint256 amount) external {
+        require(amount > 0, "Amount must be greater than zero");
 
-        allowance[msg.sender][spender] = _amount;
+        // User must approve this contract first
+        IERC20(token).transferFrom(msg.sender, address(this), amount);
 
-        emit Approval(msg.sender, spender, _amount);
-        return true;
+        tokenBalance[msg.sender][token] += amount;
+
+        emit TokenDeposited(msg.sender, token, amount);
     }
 
-    function transferFrom(address sender, address recipient, uint256 _amount) external returns (bool) {
-        if (recipient == address(0)) revert ZeroAddress();
-        if (allowance[sender][msg.sender] < _amount) {
-            revert InsufficientAllowance(allowance[sender][msg.sender], _amount);
-        }
-        if (balanceOf[sender] < _amount) revert InsufficientBalance(balanceOf[sender], _amount);
+    function withdrawToken(address token, uint256 amount) external {
+        require(tokenBalance[msg.sender][token] >= amount, "Insufficient token balance");
 
-        allowance[sender][msg.sender] -= _amount;
-        balanceOf[sender] -= _amount;
-        balanceOf[recipient] += _amount;
+        tokenBalance[msg.sender][token] -= amount;
 
-        emit Transfer(sender, recipient, _amount);
-        return true;
+        IERC20(token).transfer(msg.sender, amount);
+
+        emit TokenWithdrawn(msg.sender, token, amount);
     }
 
-    function mint(uint256 _amount) external onlyOwner {
-        _mint(msg.sender, _amount);
-    }
-
-    function burn(uint256 _amount) external {
-        if (balanceOf[msg.sender] < _amount) revert InsufficientBalance(balanceOf[msg.sender], _amount);
-
-        balanceOf[msg.sender] -= _amount;
-        totalSupply -= _amount;
-
-        emit Transfer(msg.sender, address(0), _amount);
-    }
-
-    function _mint(address _to, uint256 _amount) internal {
-        if (_to == address(0)) revert ZeroAddress();
-
-        balanceOf[_to] += _amount;
-        totalSupply += _amount;
-
-        emit Transfer(address(0), _to, _amount);
+    function checkTokenBalance(address token) external view returns (uint256) {
+        return tokenBalance[msg.sender][token];
     }
 }
