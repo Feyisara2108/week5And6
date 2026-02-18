@@ -7,12 +7,9 @@ interface IERC20 {
 }
 
 contract SaveStore {
-    // STORAGE
+    mapping(address => uint256) public etherBalance; // Ether saved by users
 
-    // Ether saved by users
-    mapping(address => uint256) public etherBalance;
-
-    // Tracks ERC20 saved by users
+    // ERC20 saved by users
     // user => tokenAddress => amount
     mapping(address => mapping(address => uint256)) public tokenBalance;
 
@@ -23,7 +20,6 @@ contract SaveStore {
     event TokenWithdrawn(address indexed user, address indexed token, uint256 amount);
 
     // ETHER FUNCTIONS
-
     function depositEther() external payable {
         require(msg.value > 0, "Send Ether");
 
