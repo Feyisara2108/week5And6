@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-// Minimal ERC20 interface
 interface IERC20 {
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
     function transfer(address recipient, uint256 amount) external returns (bool);
@@ -10,16 +9,12 @@ interface IERC20 {
 contract SaveStore {
     // STORAGE
 
-    // Tracks Ether saved by users
+    // Ether saved by users
     mapping(address => uint256) public etherBalance;
 
     // Tracks ERC20 saved by users
     // user => tokenAddress => amount
     mapping(address => mapping(address => uint256)) public tokenBalance;
-
-    // =========================
-    // EVENTS
-    // =========================
 
     event EtherDeposited(address indexed user, uint256 amount);
     event EtherWithdrawn(address indexed user, uint256 amount);
@@ -27,9 +22,7 @@ contract SaveStore {
     event TokenDeposited(address indexed user, address indexed token, uint256 amount);
     event TokenWithdrawn(address indexed user, address indexed token, uint256 amount);
 
-    // =========================
     // ETHER FUNCTIONS
-    // =========================
 
     function depositEther() external payable {
         require(msg.value > 0, "Send Ether");
