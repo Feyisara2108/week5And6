@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-// ============================================================================
 // CONTRACT 1: SchoolToken ERC20 Token
-// ============================================================================
 contract SchoolToken {
     
-    // --- BASIC TOKEN INFO ---
+    // BASIC TOKEN INFO
     string public constant name = "SchoolToken";
     string public constant symbol = "SCH";
     uint8 public constant decimals = 18;
@@ -41,7 +39,7 @@ contract SchoolToken {
         _mint(msg.sender, _initialSupply);
     }
     
-    // --- TRANSFER: Send tokens to someone ---
+    //TRANSFER: Send tokens to someone
     function transfer(address recipient, uint256 amount) external returns (bool) {
         if (recipient == address(0)) revert ZeroAddress();
         if (balanceOf[msg.sender] < amount) revert InsufficientBalance(balanceOf[msg.sender], amount);
@@ -53,7 +51,7 @@ contract SchoolToken {
         return true;
     }
     
-    // --- APPROVE: Allow someone to spend your tokens ---
+    // APPROVE: Allow someone to spend your tokens
     function approve(address spender, uint256 amount) external returns (bool) {
         if (spender == address(0)) revert ZeroAddress();
         allowance[msg.sender][spender] = amount;
@@ -61,7 +59,7 @@ contract SchoolToken {
         return true;
     }
     
-    // --- TRANSFER FROM: Spend tokens on behalf of someone ---
+    // TRANSFER FROM: Spend tokens on behalf of someone
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool) {
         if (recipient == address(0)) revert ZeroAddress();
         if (allowance[sender][msg.sender] < amount) revert InsufficientAllowance(allowance[sender][msg.sender], amount);
@@ -75,7 +73,7 @@ contract SchoolToken {
         return true;
     }
     
-    // --- BUY TOKENS: Send ETH, get SchoolTokens (1:1 ratio) ---
+    // BUY TOKENS: Send ETH, get SchoolTokens (1:1 ratio) ---
     function buyTokens() public payable {
         if (msg.value == 0) revert NoETHToSend();
         
@@ -86,7 +84,7 @@ contract SchoolToken {
         emit Transfer(address(0), msg.sender, msg.value);
     }
     
-    // --- SELL TOKENS: Send tokens back, get ETH (for staff to cash out) ---
+    //SELL TOKENS: Send tokens back, get ETH (for staff to cash out)
     function sellTokens(uint256 amount) public {
         if (balanceOf[msg.sender] < amount) revert InsufficientBalance(balanceOf[msg.sender], amount);
         
@@ -101,12 +99,12 @@ contract SchoolToken {
         emit Transfer(msg.sender, address(0), amount);
     }
     
-    // --- MINT: Create new tokens (owner only) ---
+    // MINT: Create new tokens (owner only)
     function mint(uint256 amount) external onlyOwner {
         _mint(msg.sender, amount);
     }
     
-    // --- BURN: Destroy tokens ---
+    //BURN: Destroy tokens 
     function burn(uint256 amount) external {
         if (balanceOf[msg.sender] < amount) revert InsufficientBalance(balanceOf[msg.sender], amount);
         balanceOf[msg.sender] -= amount;
@@ -114,7 +112,7 @@ contract SchoolToken {
         emit Transfer(msg.sender, address(0), amount);
     }
     
-    // --- INTERNAL MINT FUNCTION ---
+    // Internal mint function
     function _mint(address to, uint256 amount) internal {
         if (to == address(0)) revert ZeroAddress();
         balanceOf[to] += amount;
@@ -123,17 +121,15 @@ contract SchoolToken {
     }
 }
 
-// ============================================================================
+
 // CONTRACT 2: SchoolManager 
-// ============================================================================
 contract SchoolManager {
     
-    // --- STATE VARIABLES ---
-
+    //State Variable
     SchoolToken public token;
     address public principal;
     
-    // --- STRUCTS ---
+    // Struct
     struct Student {
         string name;
         uint256 level;
@@ -147,34 +143,34 @@ contract SchoolManager {
         bool isRegistered;
     }
     
-    // --- MAPPINGS & ARRAYS ---
+    // Mapping & Array
     mapping(address => Student) public students;
     mapping(address => Staff) public staffRecords;
     address[] public studentList;
     address[] public staffList;
     
-    // --- ERRORS ---
+    // Errors
     error NotPrincipal(address caller);
     error InvalidLevel(uint256 level);
     error AlreadyRegistered();
     error PaymentFailed();
     error StaffNotRegistered();
     
-    // --- MODIFIER ---
+    //Modifier
     modifier onlyPrincipal() {
         if (msg.sender != principal) revert NotPrincipal(msg.sender);
         _;
     }
     
-    // --- CONSTRUCTOR ---
+    // Constructor
     constructor(address _tokenAddress) {
         token = SchoolToken(_tokenAddress);
         principal = msg.sender;
     }
     
-    // --- HELPER: Calculate Fee ---
+    // HELPER: Calculate Fee
     function _getFeeForLevel(uint256 level) internal pure returns (uint256) {
-        // Level 100 = 100 tokens, Level 400 = 400 tokens
+        // Level 100 = 10 tokens, Level 400 = 40 tokens
         // Multiply by 10**18 because tokens have 18 decimals
         if (level == 100) return 10 * 10**18;
         if (level == 200) return 20 * 10**18;
@@ -183,7 +179,7 @@ contract SchoolManager {
         revert InvalidLevel(level);
     }
     
-    // --- REGISTER STUDENT ---
+    // Register student
     function registerStudent(string memory _name, uint256 _level) external {
         if (students[msg.sender].hasPaid) revert AlreadyRegistered();
         
@@ -202,7 +198,7 @@ contract SchoolManager {
         studentList.push(msg.sender);
     }
     
-    // --- GET STUDENT ---
+    // Get students 
     function getStudent(address _student) external view returns (
         string memory name,
         uint256 level,
@@ -213,12 +209,12 @@ contract SchoolManager {
         return (s.name, s.level, s.hasPaid, s.paymentTimestamp);
     }
     
-    // --- GET ALL STUDENTS ---
+    // Get all students
     function getAllStudents() external view returns (address[] memory) {
         return studentList;
     }
     
-    // --- REGISTER STAFF ---
+    // Register staff
     function registerStaff(address _staff, string memory _name, uint256 _salary) external onlyPrincipal {
         if (staffRecords[_staff].isRegistered) revert AlreadyRegistered();
         
@@ -231,7 +227,7 @@ contract SchoolManager {
         staffList.push(_staff);
     }
     
-    // --- PAY ONE STAFF ---
+    // Pay one staff
     function payStaff(address _staff) external onlyPrincipal {
         Staff memory s = staffRecords[_staff];
         if (!s.isRegistered) revert StaffNotRegistered();
@@ -239,7 +235,7 @@ contract SchoolManager {
         token.transfer(_staff, s.salary);
     }
     
-    // --- PAY ALL STAFF ---
+    // Pay all staff
     function payAllStaff() external onlyPrincipal {
         for (uint256 i = 0; i < staffList.length; i++) {
             address staffAddr = staffList[i];
@@ -251,12 +247,12 @@ contract SchoolManager {
         }
     }
     
-    // --- GET ALL STAFF ---
+    // Get all staff
     function getAllStaff() external view returns (address[] memory) {
         return staffList;
     }
     
-    // --- GET SCHOOL BALANCE ---
+    // Get school balance
     function getSchoolBalance() external view returns (uint256) {
         return token.balanceOf(address(this));
     }
