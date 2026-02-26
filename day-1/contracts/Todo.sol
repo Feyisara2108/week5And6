@@ -24,11 +24,11 @@ contract Todo {
         return tasks;
     }
 
-    // we are using for loop because we need to iterate over all the task(struct) to get the id
+    // we are using for loop because we need to iterate/ keep searching over all the task(struct) to get the id
     function markComplete(uint8 _id) external {
         for (uint8 i; i < tasks.length; i++) {
             if (tasks[i].id == _id) {
-                tasks[i].isComplete = true;
+                tasks[i].isComplete = true; //marks it complete
                 tasks[i].timeCompleted = block.timestamp;
             }
         }
@@ -43,6 +43,7 @@ contract Todo {
         }
     }
 
+    //we could have used delete keyword but it leave space
     function deleteTask(uint8 _id) external {
         for (uint8 i; i < tasks.length; i++) {
             if (tasks[i].id == _id) {
@@ -51,6 +52,5 @@ contract Todo {
             }
         }
     }
-
-    //Mapping is a key value pair ike using the same nin and bvn to open different account
+    //Mapping is a key value pair like using the same nin and bvn to open different account
 }

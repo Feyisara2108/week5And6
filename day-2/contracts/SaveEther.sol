@@ -6,7 +6,7 @@ contract SaveEther {
     mapping(address => uint256) public balances;
 
     uint256 age;
-
+    //events are way to
     event DepositSuccessful(address indexed sender, uint256 indexed amount);
 
     event WithdrawalSuccessful(address indexed receiver, uint256 indexed amount);
@@ -50,6 +50,7 @@ contract SaveEther {
         return address(this).balance;
     }
 
+    //when writing a native function that has to receive an eth, we need receive and fallback
     receive() external payable {}
     fallback() external {}
 }
