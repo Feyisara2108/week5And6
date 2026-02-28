@@ -1,11 +1,11 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
 // Uncomment this line to use console.log
 // import "hardhat/console.sol";
 
-contract Lock {
-    // //Value Types
+contract SetterGetter {
+    // value types
     // bool keyword;
     // int256 time;
     // uint256 age;
@@ -13,10 +13,12 @@ contract Lock {
     // bytes1 by;
     // enum status {
     //     Online,
-    //     Onsite
+    //     onsite
     // }
-    // //reference types
+    //
+    // // reference types
     // int256[] students;
+    //
     // struct Users {
     //     uint8 id;
     // }
