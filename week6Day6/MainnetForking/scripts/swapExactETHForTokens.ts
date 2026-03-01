@@ -22,40 +22,38 @@ const main = async () => {
     impersonatedSigner
   );
 
-  const amountOut = ethers.parseUnits("1", 18);
+  const amountOut = ethers.parseUnits("1000", 6);
 
-  const amountInMax = ethers.parseUnits("3000", 6);
-
-  const path = [ USDCAddress, WETHAddress];
+  const path = [WETHAddress, USDCAddress];
 
   const deadline = Math.floor(Date.now() / 1000) + 60 * 10;
 
-  const usdcBalanceBefore = await USDC.balanceOf(impersonatedSigner.address);
+  const usdcBalanceBefore = await USDC.balanceOf(impersonatedSigner);
 
   const wethBalanceBefore = await ethers.provider.getBalance(
-    impersonatedSigner.address
+    impersonatedSigner
   );
 
   console.log("=======Before============");
 
-  console.log("weth balance before", Number(wethBalanceBefore, ));
-  console.log("usdc balance before", Number(usdcBalanceBefore, ));
+  console.log("weth balance before", Number(wethBalanceBefore));
+  console.log("usdc balance before", Number(usdcBalanceBefore));
 
-  await USDC.approve(UNIRouter, amountInMax);
-
-  const transaction = await UniRouterContract.swapTokensForExactETH(
+  const transaction = await UniRouterContract.swapETHForExactTokens(
     amountOut,
-    amountInMax,
     path,
-    impersonatedSigner.address,
+    impersonatedSigner,
     deadline,
+    {
+      value: ethers.parseEther("0.7"),
+    }
   );
 
   await transaction.wait();
 
   console.log("=======After============");
-  const usdcBalanceAfter = await USDC.balanceOf(impersonatedSigner.address);
-  const wethBalanceAfter = await ethers.provider.getBalance(impersonatedSigner.address);
+  const usdcBalanceAfter = await USDC.balanceOf(impersonatedSigner);
+  const wethBalanceAfter = await ethers.provider.getBalance(impersonatedSigner);
   console.log("weth balance after", Number(wethBalanceAfter));
   console.log("usdc balance after", Number(usdcBalanceAfter));
 
