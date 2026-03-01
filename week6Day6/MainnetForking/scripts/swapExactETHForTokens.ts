@@ -10,71 +10,45 @@ const main = async () => {
   await helpers.impersonateAccount(TokenHolder);
   const impersonatedSigner = await ethers.getSigner(TokenHolder);
 
-  const USDC = await ethers.getContractAt(
-    "IERC20",
-    USDCAddress,
-    impersonatedSigner
-  );
+  const USDC = await ethers.getContractAt("IERC20", USDCAddress, impersonatedSigner);
+  const UniRouterContract = await ethers.getContractAt("IUniswapV2Router", UNIRouter, impersonatedSigner);
 
-  const UniRouterContract = await ethers.getContractAt(
-    "IUniswapV2Router",
-    UNIRouter,
-    impersonatedSigner
-  );
-
-  const amountOut = ethers.parseUnits("1000", 6);
+  const amountOut = ethers.parseUnits("1000", 6); 
 
   const path = [WETHAddress, USDCAddress];
-
   const deadline = Math.floor(Date.now() / 1000) + 60 * 10;
 
-  const usdcBalanceBefore = await USDC.balanceOf(impersonatedSigner);
-
-  const wethBalanceBefore = await ethers.provider.getBalance(
-    impersonatedSigner
-  );
+  const usdcBalanceBefore = await USDC.balanceOf(impersonatedSigner.address);
+  const ethBalanceBefore = await ethers.provider.getBalance(impersonatedSigner.address);
 
   console.log("=======Before============");
-
-  console.log("weth balance before", Number(wethBalanceBefore));
-  console.log("usdc balance before", Number(usdcBalanceBefore));
+  console.log("eth balance before", ethers.formatEther(ethBalanceBefore));
+  console.log("usdc balance before", ethers.formatUnits(usdcBalanceBefore, 6));
 
   const transaction = await UniRouterContract.swapETHForExactTokens(
-    amountOut,
+    amountOut,                    
     path,
-    impersonatedSigner,
+    impersonatedSigner.address,  
     deadline,
-    {
-      value: ethers.parseEther("0.7"),
-    }
+    { value: ethers.parseEther("2") } 
   );
 
   await transaction.wait();
 
   console.log("=======After============");
-  const usdcBalanceAfter = await USDC.balanceOf(impersonatedSigner);
-  const wethBalanceAfter = await ethers.provider.getBalance(impersonatedSigner);
-  console.log("weth balance after", Number(wethBalanceAfter));
-  console.log("usdc balance after", Number(usdcBalanceAfter));
+  const usdcBalanceAfter = await USDC.balanceOf(impersonatedSigner.address);
+  const ethBalanceAfter = await ethers.provider.getBalance(impersonatedSigner.address);
+  console.log("eth balance after", ethers.formatEther(ethBalanceAfter));
+  console.log("usdc balance after", ethers.formatUnits(usdcBalanceAfter, 6));
 
   console.log("=========Difference==========");
-  const newUsdcValue = Number(usdcBalanceAfter - usdcBalanceBefore);
-  const newWethValue = wethBalanceBefore - wethBalanceAfter;
-  console.log("NEW USDC BALANCE: ", ethers.formatUnits(newUsdcValue, 6));
-  console.log("NEW WETH BALANCE: ", ethers.formatEther(newWethValue));
+  const usdcGained = usdcBalanceAfter - usdcBalanceBefore;
+  const ethSpent = ethBalanceBefore - ethBalanceAfter;
+  console.log("USDC GAINED: ", ethers.formatUnits(usdcGained, 6));
+  console.log("ETH SPENT:   ", ethers.formatEther(ethSpent));
 };
 
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
-
-
-
-
-
-
-
-
-
-
