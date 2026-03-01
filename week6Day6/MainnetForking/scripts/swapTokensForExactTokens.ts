@@ -28,27 +28,27 @@ const main = async () => {
         impersonatedSigner
     );
 
-    const amountIn = ethers.parseUnits("1000", 6);
+    const amountOut = ethers.parseUnits("1000", 6);
 
-    const amountOutMin = ethers.parseUnits("990", 6);
+    const amountInMax = ethers.parseUnits("1100", 6);
 
     const path = [USDTAddress, USDCAddress];
 
     const deadline = Math.floor(Date.now() / 1000) + 60 * 10;
 
-    const usdcBalanceBefore = await USDC.balanceOf(TokenHolder);
+    const usdcBalanceBefore = await USDC.balanceOf(impersonatedSigner.address);
 
-    const usdtBalanceBefore = await USDT.balanceOf(TokenHolder);
+    const usdtBalanceBefore = await USDT.balanceOf(impersonatedSigner.address);
 
     console.log("=======Before============");
 
     console.log("usdt balance before", ethers.formatUnits(usdtBalanceBefore, 6));
     console.log("usdc balance before", ethers.formatUnits(usdcBalanceBefore, 6));
 
-    await USDT.approve(UNIRouter, amountIn);
-    const transaction = await UniRouterContract.swapExactTokensForTokens(
-        amountIn,
-        amountOutMin,
+    await USDT.approve(UNIRouter, amountInMax);
+    const transaction = await UniRouterContract.swapTokensForExactTokens(
+        amountOut,
+        amountInMax,
         path,
         TokenHolder,
         deadline,
@@ -58,8 +58,8 @@ const main = async () => {
     await transaction.wait();
 
     console.log("=======After============");
-    const usdcBalanceAfter = await USDC.balanceOf(TokenHolder);
-    const usdtBalanceAfter = await USDT.balanceOf(TokenHolder);
+    const usdcBalanceAfter = await USDC.balanceOf(impersonatedSigner.address);
+    const usdtBalanceAfter = await USDT.balanceOf(impersonatedSigner.address);
     console.log("usdt balance after", ethers.formatUnits(usdtBalanceAfter, 6));
     console.log("usdc balance after", ethers.formatUnits(usdcBalanceAfter, 6));
 
@@ -67,8 +67,8 @@ const main = async () => {
     console.log("=========Difference==========");
     const newUsdcValue = usdcBalanceAfter - usdcBalanceBefore;
     const newUsdtValue = usdtBalanceBefore - usdtBalanceAfter;
-    console.log("NEW USDC BALANCE: ", ethers.formatUnits(newUsdcValue, 6));
-    console.log("NEW USDT BALANCE: ", ethers.formatUnits(newUsdtValue, 6));
+    console.log("NEW USDC GAINED: ", ethers.formatUnits(newUsdcValue, 6));
+    console.log("NEW USDT SPENT: ", ethers.formatUnits(newUsdtValue, 6));
 };
 
 main().catch((error) => {
