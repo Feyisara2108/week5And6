@@ -1,0 +1,4 @@
+![swapTokensForExactETH](https://github.com/user-attachments/assets/a84a10e8-edfe-4f51-86e6-a99975347963)
+![swapTokensForExactTokens](https://github.com/user-attachments/assets/80c29078-6c32-4f79-b452-21afa999161c)
+![swapExactTokensForTokens](https://github.com/user-attachments/assets/c61809cc-4e14-4198-aa01-4180be3d38cb)
+![swapExactETHForTokens](https://github.com/user-attachments/assets/d935eed5-7c31-405f-813d-8b90e47277f8)
