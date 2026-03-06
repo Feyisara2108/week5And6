@@ -3,3 +3,5 @@
 ![swapExactTokensForTokens](https://github.com/user-attachments/assets/c61809cc-4e14-4198-aa01-4180be3d38cb)
 ![swapExactETHForTokens](https://github.com/user-attachments/assets/d935eed5-7c31-405f-813d-8b90e47277f8)
 ![addLiquidityETH](https://github.com/user-attachments/assets/7920a021-8bcc-40a5-96a9-d14aff5cc98b)
+![removeLiquidity](https://github.com/user-attachments/assets/0dc3ecd4-c21f-4557-b760-bafbe1e2244d)
+![removeLiquidityETH](https://github.com/user-attachments/assets/5b1b5f11-39b5-4c6d-92c8-030d1805291e)
