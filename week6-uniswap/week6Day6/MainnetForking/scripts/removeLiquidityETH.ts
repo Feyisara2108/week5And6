@@ -53,11 +53,6 @@ const main = async () => {
   const daiBalanceAfter = await DAI.balanceOf(impersonatedSigner.address);
   const ethBalanceAfter = await ethers.provider.getBalance(impersonatedSigner.address);
 
-  console.log("=======After============");
-  console.log("dai balance after", ethers.formatUnits(daiBalanceAfter, 18));
-  console.log("eth balance after", ethers.formatEther(ethBalanceAfter));
-
-  console.log("=========Difference==========");
   const daiReceived = daiBalanceAfter - daiBalanceBefore;
   const ethReceived = ethBalanceAfter - ethBalanceBefore;
   console.log("DAI RECEIVED:", ethers.formatUnits(daiReceived, 18));
